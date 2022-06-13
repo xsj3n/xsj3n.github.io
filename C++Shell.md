@@ -1,8 +1,7 @@
 layout: post
 title: "C++ Reverse Shell"
 permalink: /0/
-date: 2022-06-13 8:16:46 -0000
-categories: Reverse-Shell, C++, obfuscation
+
 
 ### C++ Reverse Shell : Blog posting 0
 
