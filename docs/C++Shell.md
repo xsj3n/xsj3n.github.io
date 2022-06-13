@@ -3,7 +3,7 @@ title: "C++ Reverse Shell"
 permalink: /0/
 
 
-### C++ Reverse Shell : Blog posting 0
+### C++ Reverse Shell : Post 0
 
 My last C++ project was quite a while ago, and it was really quite bad, so I was looking to make a red teaming tool that is extensible. Something I could continually pile on features to such as building a crypter for the program, injecting the bytes into another process, and all that other fun stuff that malware authors tend to implement. However for now, I was simply focused on building out the core functionality, mostly. Ideally, the goal was to include at least some very, very light network obfuscation (don't want command-line banners busting me) and unhooking CreateProcessA. 
 
