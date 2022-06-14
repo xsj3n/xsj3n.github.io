@@ -1,6 +1,3 @@
-layout: page
-title: "C++ Reverse Shell"
-permalink: /0/
 
 
 ### C++ Reverse Shell : Post 0
