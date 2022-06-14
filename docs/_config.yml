@@ -1,8 +1,7 @@
-remote_theme: alshedivat/al-folio
+theme: jekyll-theme-midnight
 lsi: false
 safe: true
 source: /xsj3n.github.io/docs/
 github:
   is_project_page: false
 
-theme: jekyll-theme-midnight
