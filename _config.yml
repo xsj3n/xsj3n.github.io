@@ -1,6 +1,8 @@
 theme: jekyll-theme-hacker
 lsi: false
 safe: true
+github:
+  is_project_page: false
 source: /xsj3n.github.io/
 incremental: false
 highlighter: rouge
