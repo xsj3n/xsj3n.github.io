@@ -1,4 +1,4 @@
-theme: jekyll-theme-hacker
+remote_theme: alshedivat/al-folio
 lsi: false
 safe: true
 source: /xsj3n.github.io/docs/
