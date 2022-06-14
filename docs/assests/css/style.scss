@@ -4,11 +4,9 @@
 @import "{{ site.theme }}";
 
 .container {
-  h1 {
-    text-align: center;
-  } 
+  text-align: center;
 }
 
-.main-content {
+.main_content {
   text-align: center;  
 }
