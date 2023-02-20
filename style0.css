@@ -1,0 +1,39 @@
+:root {
+    --secondary:#271B25 !important;
+    --highlight:#4d3449 !important;
+}
+
+
+#bod {
+    background-image: url(webb-dark\ \(1\).png);
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+#topheader {
+    background-color: var(--secondary);
+    border-bottom: solid 1px silver;
+    width: 100%;
+}
+#topheader a{
+    color: #031c22;
+    font-weight: 600;
+    font-size: 0.89rem;
+}
+
+.sec {
+    background-color: #120f13ab;
+  
+}
+
+.txt {
+    color: rgb(212, 212, 218);
+    margin-left: 18vw;
+    margin-right: 19vw;
+}
+hr {
+    color: aliceblue;
+    width: 65%;
+    margin: auto;
+}

@@ -1,0 +1,140 @@
+:root {
+    --secondary:#271B25 !important;
+    --highlight:#4d3449 !important;
+}
+
+
+#topheader {
+    background-color: var(--secondary);
+    border-bottom: solid 1px silver;
+    width: 100%;
+}
+
+
+#topheader a{
+    color: #031c22;
+    font-weight: 600;
+    font-size: 0.89rem;
+}
+
+#sec {
+    width: 100%;
+    height: 100%;
+}
+
+#icon1 {
+    background-size: contain;
+}
+
+#bod {
+    background-image: url(webb-dark\ \(1\).png);
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#divoverlay {
+    /*background-color: rgba(0, 0, 0, 0.40);*/
+    margin-top: 5.3%;
+    margin-bottom: 0px;
+    
+}
+
+#divoverlayone {
+    background-color: rgba(0, 0, 0, 0.40);
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#divoverlayone img {
+    margin-top: 25px;
+}
+
+#cardone {
+    background-color: rgba(0, 0, 0, 0.40);
+    border-radius: 5%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: silver;
+    margin-top: 2rem;
+    margin-left: 4rem;
+    
+}
+
+
+#card {
+    background-color: rgba(0, 0, 0, 0.40);
+    border-radius: 5%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: silver;
+    margin-top: 2rem;
+    margin-left: 4rem;
+    
+}
+
+#card-mgr {
+   width: 29.5%;
+   height: 29.5%;
+   margin-left: 10rem;
+}
+
+#card-mgr-route {
+    width: 25%;
+    height: 25%;
+    margin-top: 1rem;
+ }
+
+.butt {
+    background-color: var(--secondary);
+    border-color: var(--highlight);
+    border-width: -200px;
+    
+}
+
+.abt {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--highlight);
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, .45);
+    margin-right: 2%;
+
+}
+.abt::before {
+    content: '';
+    display: block;
+    height: 0.5rem;
+    min-width: 30vw;
+    background: linear-gradient(to right, rgba(240,240,240,0), var(--highlight));
+    margin-right: 2vh;
+}
+.abt::after {
+    content: '';
+    display: block;
+    height: 0.5rem;
+    min-width: 30vw;
+    background: linear-gradient(to left, rgba(240,240,240,0), var(--highlight));
+    margin-left: 2vh;
+}
+
+.vidcon {
+    height: 430px;
+    width: 100%;
+    position: relative;
+    border-bottom: solid silver 1px;
+}
+
+.vidcon video {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.vidcon div {
+    z-index: 1;
+}
+
