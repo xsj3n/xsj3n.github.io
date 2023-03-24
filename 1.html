@@ -27,5 +27,128 @@
         </div>
     </header>
 
+    <div class="container-fluid sec">
+      <br>
+      <h3 class="display-3 text-center mt-2" style="color: rgb(212, 212, 218);">Device Setup</h3>
+      <p class="fs-4 txt text-center"">Published: September, 2022</p>
+      <br>
+      <p class="fs-5 txt">The TL-MR3020- a cheap fifteen dollar access point intended to be used for Wi-Fi sharing. It’s from ~2014, so its resources are incredibly limited. Just a handful of MBs of RAM and flash. Despite this, you could use it to perform a wide variety of the functions a Wi-Fi pineapple could, with a bit of work that is. As a frugal person with a growing love for wireless security, I thought this could be a fun platform to work with.</p>
+      <br>
+      <p class="fs-5 txt">The platform that makes this all possible is the OpenWrt platform, open source firmware for access points. Newer versions of OpenWrt are a bit too resource intensive for the TL-MR3020, but there are ways to work around this. The first big hurdle would be how much disk space the device has, sporting only 8MB of internal flash- absolutely useless in such a state. Thankfully, the OpenWrt platform supports Exroot, allowing you to configure a flash drive for the system to run on, hugely extending the available amount of space available.</p>
+      <br>
+      <p class="fs-5 txt">So, how does one go about this? First, I installed the OpenWrt firmware to the TL-MR3020- the most barebones version to make the image small enough to be viable for flashing on the device. I used an older version, referred to as Linux Embedded Device Environment (LEDE), which is a lot smaller. In addition to this, I removed the web GUI from the firmware image to make room for the necessary drivers for flash drive support. The developers of the OpenWrt project made a tool which is hugely convenient for these purposes, an image builder.</p>
+      <br>
+      <p class="fs-5 txt fst-italic">“You can download an archive that contains the Image Builder, it is usually located in the same download page where you find the firmware image for your device. For example, this is the page where you can download all firmware images for ath79/generic devices: https://downloads.openwrt.org/snapshots/targets/ath79/generic/ and you will find a openwrt-imagebuilder-ath79-generic.Linux-x86_64.tar.xz archive with the image builder in it.”</p>
+      <br>
+      <p class="fs-5 txt">The tool can be used to build an LEDE image with no GUI modules, and the required ones for flash drive support, like so:</p>
+      <br><hr><br>
+      <pre class="txt">
+        <code class="fs-6">
+make image PACKAGES="kmod-usb-storage block-mount kmod-fs-ext4 -luci -luci-ssl -uhttpd”
+        </code>
+      </pre>
+      <hr>
+      <br>
+      <p class="fs-5 txt">The generated images are stored in the bin/device-architecture directory, just like if you were compiling them. You can then use make clean to clean up temporary files and generated images. After doing so, I was able to login to the router, go to the advanced section, then select firmware upgrade and then select the generated image for the upgrade. After allowing the firmware to finish updating and restart, I was able to SSH into the AP to begin configuration. The default SSH information for the platform can be found on the OpenWrt wiki.</p>
+      <br>
+      <p class="fs-5 txt">Exroot configuration is fairly simple. The flash drive must be formatted to the EXT4 filesystem. On a linux machine, simply run the mkfs.ext4 command and target the flash drive you wish to use. I recommend formatting on a bare metal linux machine as I personally experienced issues when formatting the flash drive via a virtual machine.</p>
+      <br>
+      <p class="fs-5 txt">After that, the wiki lays out some commands for exroot configuration. First though, the formatted flash drive must be plugged in. The dmesg command can be used to validate it’s being recognized by the device, and what device name it is delegated. After such is done, the commands to configure fstab (which exroot uses) are as follows:</p>
+      <br><hr><br>
+      <pre class="txt">
+        <code class="fs-5">
+          eval $(block info ${DEVICE} | grep -o -e "UUID=\S*")
+          uci -q delete fstab.overlay
+          uci set fstab.overlay="mount"
+          uci set fstab.overlay.uuid="${UUID}"
+          uci set fstab.overlay.target="/overlay"
+          uci commit fstab
+        </code>
+      </pre>
+      <br><hr><br>
+      <p class="txt fs-5">Just a few more commands to replicate the OS system files onto the flash drive:</p>
+      <br><hr><br>
+      <pre class="txt">
+        <code class="fs-5">
+          mkdir -p /tmp/cproot
+          mount --bind /overlay /tmp/cproot
+          mount ${DEVICE} /mnt
+          tar -C /tmp/cproot -cvf - . | tar -C /mnt -xf -    
+          umount /tmp/cproot /mnt
+          reboot
+        </code>
+      </pre>
+      <br><hr><br>
+      <p class="txt fs-5">After the reboot, validating it worked can be done with the df -h command. A overlayfs:/overlay should be present in the output, with a size corresponding to whichever flash drive was used. In my case, I had 26.7Gbs of usable space afterwards.</p>
+      <br>
+      <p class="txt fs-5">Configuring the rest of the device- as only the CLI is available- is done via altering the files under /etc/config. There’s four text files which control most of the networking functionality within the directory- wireless, network, firewall, and dhcp. To get the device to connect to Wi-Fi as a client, first edit the network config file as so:</p>
+      <br><hr>
+      <pre class="txt">
+        <code class="fs-5">
+          config interface 'wan'
+                option proto 'dhcp'
+        </code>
+      </pre>
+      <hr><br>
+      <p class="txt fs-5">This will declare the wan interface as a dhcp client. Next, the wireless config file can be used to connect to, or declare an access point, as so:</p>
+      <br><hr><br>
+      <pre class="txt">
+        <code class="fs-5">
+          config wifi-device 'radio0'
+                option type 'mac80211'
+                option channel '11'
+                option hwmode '11g'
+                option path 'platform/ar933x_wmac'
+                option htmode 'HT20'
+                option disabled '0'
+                option country 'US'
+
+          # Most likely will not have to change options above, yet ensure the values are right.
+          # Especially ensure disabled is set to 0
+
+          config wifi-iface 'default_radio0'
+                option device 'radio0'
+                option mode 'sta'
+                option bssid 'MAC OF GATEWAY’
+                option ssid ‘NETWORK-NAME'
+                option encryption 'psk2'
+                option key 'PASSWORD'
+                option network 'wan’
+        </code>
+      </pre>
+      <br><hr><br>
+      <p class="txt fs-5">The “wifi-device” declared refers to the NIC and its hardware configuration. </p>
+      <br>
+      <p class="txt fs-5">The “wifi-iface” option allows one to define how the NIC is used, as a client, or as an access point itself. It’s mainly the software configuration, by declaring multiple, you can set up as many virtual NICs as the hardware supports.</p>
+      <br>
+      <p class="txt fs-5">In order to connect as a client, the “sta” mode is used (stands for station). Feed in the BSSID, SSID, and the encryption type.</p>
+      <br>
+      <p class="txt fs-5">The “network” option defined last is a somewhat confusing quirk of configuring the platform, at first anyhow. Simply, it’s the name the platform will use for configuring that NIC interface in the firewall and dhcp. It’s a way to manage the traffic & clients which may be completely different on separate virtual NIC interfaces.</p>
+      <br>
+      <p class="txt fs-5">After that is done, internet connectivity should be active. So, packages and updates can be installed. The second hurdle is the limited amount of RAM the device has access to. There isn’t too much that can be done regarding this, but there is one optimization- installing the zram-swap package. This will enable the use of a swap file, which is good considering there’s an abundance of disk space with exroot configured.</p>
+      <br><hr><br>
+      <pre class="txt">
+        <code class="fs-5">
+          opkg install zram-swap
+        </code>
+      </pre>
+      <br><hr>
+      <p class="txt fs-5">The zram-swap package is the difference between crashing constantly and this device actually being useful. Additionally, the HTTP GUI can be installed for ease of use:</p>
+      <br><hr><br>
+      <pre class="txt">
+        <code class="fs-5">
+          opkg install luci luci-ssl uhttpd
+        </code>
+      </pre>
+      <br><hr>
+      <p class="txt fs-5">At this point, the device is more or less ready for bigger and better things. Aircrack, tcpdump, and other packages can be installed at this point. In the next posts, I’ll go over automating wireless sniffing, LAN phishing attacks, and developing a tool for remote LAN access. </p>
+      <br>
+      <p class="txt fs-5">If anyone is interested in working with Openwrt themselves, then make sure to read the wiki. It contains some good documentation to get you rolling.</p>
+      <br>
+      <br>
+    </div>
+
   </body>
+  <footer>
+  </footer>
 </html>
