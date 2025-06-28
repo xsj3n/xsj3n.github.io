@@ -33,7 +33,7 @@ export default async function PostPage({params}: PostProps) {
     title: fileName.split("_").join(" ").split(".")[0].toUpperCase()
   }
   
-  const registeredLangs = new Set()
+
   const formatted_content = post.content.map((paragraph) => {
     const matches = [...paragraph.matchAll(/```(.*?)```/gs)]
     if (!matches.length) return (
@@ -44,13 +44,6 @@ export default async function PostPage({params}: PostProps) {
   
 
     const language = matches[0][0].split(/```(.*)\n/)[1]
-    console.log(language)
-    if (!registeredLangs.has(language)){
-      registeredLangs.add(language)
-      //const langImport = dynamic(() => import(langImportPrefix + language), {ssr: true})
-      //SyntaxHighlighter.registerLanguage(language, langImport)
-    }
-
     return (
       <div className="mb-4 text-center w-full">
       <div>----------------</div>
