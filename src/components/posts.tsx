@@ -7,7 +7,7 @@ export default async function Posts() {
   const dirPath = path.join(process.cwd(), "src", "posts")
   const files = await fs.readdir(dirPath)
 
-  if (!files.length) return (
+  if (!files.filter(fileName => !fileName.startsWith(".")).length) return (
     <div className="bg-secondary dark:bg-dark-secondary justify-center items-center flex flex-col h-2/5 m-2 p-2">
       <h2 className={`${fixedsysAlt.className } text-2xl whitespace-nowrap`}>-------x-------</h2>
       <h2 className={`${fixedsysAlt.className } text-2xl `}>Nothing here... yet.</h2>
