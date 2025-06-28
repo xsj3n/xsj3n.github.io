@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import { DotGothic16 } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/nav";
-
-const dotGothic = DotGothic16({
-  weight: ["400"],
-  subsets: ["latin"],
-  display: "swap"
-}) 
+import { sfMono } from "@/components/fonts";
 
 export const metadata: Metadata = {
   title: "xsj3n",
@@ -15,15 +9,14 @@ export const metadata: Metadata = {
 };
 
 
-
-
 export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+
   return (
-    <html lang="en">
-      <body className={`${dotGothic.className} antialiased h-screen w-screen`}>
-        <Nav/>
-        {children}
+    <html lang="en" className="min-h-screen m-0 p-0">
+      <body className={`${sfMono.className} bg-background dark:bg-dark-background antialiased flex min-h-screen w-full m-0 p-0`}>
+        <Nav>{children}</Nav>
       </body>
     </html>
   );
 }
+
