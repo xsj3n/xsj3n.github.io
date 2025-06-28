@@ -7,10 +7,10 @@ import { Fragment } from "react";
 
 export async function generateStaticParams() {
   const dirPath = path.join(process.cwd(), "src", "posts")
-  try {
-    const files = await fs.readdir(dirPath)
-    return files.map(fileName => ({blog: fileName.split(".")[0]}))
-   } catch { return [{blog: "not-found"}] }
+  const files = await fs.readdir(dirPath)
+
+  if (!files.filter(fileName => !fileName.startsWith(".")).length) return [{blog: "not-found"}] }
+  return files.map(fileName => ({blog: fileName.split(".")[0]}))
 }
 
 
