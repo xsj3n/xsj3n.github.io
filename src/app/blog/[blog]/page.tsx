@@ -3,11 +3,13 @@ import {promises as fs} from "fs";
 import { fixedsysAlt } from "@/components/fonts";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco';
-import { Children, Fragment } from "react";
+import { Fragment } from "react";
 
 export async function generateStaticParams() {
   const dirPath = path.join(process.cwd(), "src", "posts")
   const files = await fs.readdir(dirPath)
+  const filteredFiles = files.filter(fileName => !fileName.startsWith("."))
+  if (!filteredFiles.length) return []
  
   return files.map(fileName => ({blog: fileName.split(".")[0]}))
 }
