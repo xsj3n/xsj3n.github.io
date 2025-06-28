@@ -10,7 +10,7 @@ export async function generateStaticParams() {
   try {
     const files = await fs.readdir(dirPath)
     return files.map(fileName => ({blog: fileName.split(".")[0]}))
-   } catch { return [{blog: ""}] }
+   } catch { return [{blog: "not-found"}] }
 }
 
 
