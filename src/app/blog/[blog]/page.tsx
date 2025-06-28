@@ -9,10 +9,9 @@ export async function generateStaticParams() {
   const dirPath = path.join(process.cwd(), "src", "posts")
   try {
     const files = await fs.readdir(dirPath)
-    const filteredFiles = files.filter(fileName => !fileName.startsWith("."))
     return files.map(fileName => ({blog: fileName.split(".")[0]}))
    } catch {return []}
-  }
+}
 
 
 interface PostProps {
