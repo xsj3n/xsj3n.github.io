@@ -176,7 +176,7 @@ export default async function PostPage({params}: PostProps) {
   const linkedElements           = recurseModifyTree(highlightedElements, insertLinks)
   
   return (
-    <div className="dark:bg-dark-secondary bg-secondary flex flex-col pr-10 pl-10 pt-5 ml-15 mr-15 mt-5 ">
+    <div className="dark:bg-dark-secondary bg-secondary flex flex-col pr-10 pl-10 pt-5 sm:ml-15 sm:mr-15 ml-2 mr-2 mt-5">
       <div className="flex flex-col text-center mb-10 gap-2">
         <h1 className={`${fixedsysAlt.className} text-2xl`}>{post.title}</h1>
         <h3 className="font-bold">{post.date}</h3>
