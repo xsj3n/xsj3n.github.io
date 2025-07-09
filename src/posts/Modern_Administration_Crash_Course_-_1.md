@@ -1,4 +1,4 @@
-Striving to replicate modern administration practices, this post focuses on laying the groundwork for a fully automated home lab deployment. Early on in the series, there will be a focus on Proxmox, Terraform, and Ansible.
+Taking a bite out of modern administration with IaC, virtualization, and Windows administration. This will be laying the groundwork for a homelab to do all the things. 
 ---
 6/30/2025
 ---
@@ -80,7 +80,7 @@ printf "IMPORTANT: These credentials will only be viewable once! Record them now
 ENDSSH
 ```
 
-This will produce two secrets; one will be the required API token, and the other will serve as password for the provider's Linux user account, so it may access Proxmox via SSH. Record the secrets, as they will be needed shortly.
+This will produce two secrets: one will be the required API token, and the other will serve as password for the provider's Linux user account, so it may access Proxmox via SSH. Record the secrets, as they will be needed shortly.
 
 There may be some confusion regarding why the provider requires SSH access, and why we create two accounts for terraform:
 
