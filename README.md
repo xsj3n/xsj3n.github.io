@@ -1,3 +1,3 @@
 # TODO:
 - Fix theme change occuring on window resize breakpoint for mobile
-- Provide a hljs theme that goes better with the light theme
+- Socials icon pop right out the designated box under certain dimensions 
