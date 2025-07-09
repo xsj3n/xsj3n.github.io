@@ -88,7 +88,7 @@ function DesktopNav({children}: ChildProp) {
       <div className="grid grid-cols-8 h-full w-full">
         {isRoot ? (
           <>
-          <AboutMe className="mt-2 ml-2 col-span-2 h-100"/> 
+          <AboutMe className="mt-2 ml-2 col-span-2 h-110"/> 
           <div className="col-span-6">{children}</div>
           </>
         ) : (
