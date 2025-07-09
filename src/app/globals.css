@@ -33,3 +33,10 @@ body {
     font-size: .85rem;
   }
 }
+
+code {
+  background: none !important
+}
+span {
+  background: none !important
+}

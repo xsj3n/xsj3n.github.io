@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
 
   return (
-    <html lang="en" className="min-h-screen m-0 p-0">
+    <html lang="en" className="dark min-h-screen m-0 p-0">
       <body className={`${sfMono.className} bg-background dark:bg-dark-background antialiased flex min-h-screen w-full m-0 p-0`}>
         <Nav>{children}</Nav>
       </body>

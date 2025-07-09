@@ -27,6 +27,7 @@ export default async function Posts() {
     })
   )
   
+  console.log(summaries)
   return (
     <div className="flex flex-col h-full gap-2 p-2">
       
