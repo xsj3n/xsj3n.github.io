@@ -3,6 +3,7 @@ import {promises as fs} from "fs";
 import { fixedsysAlt } from "@/components/fonts";
 import { cloneElement, Fragment, isValidElement, ReactElement } from "react";
 import HighlightedCode from "@/components/highlight";
+import Image from "next/image";
 
 const pTagClassNames = "mb-3 sm:text-[.95rem] text-[0.90rem]"
 export async function generateStaticParams() {
@@ -33,6 +34,13 @@ function fromb64(str: string) {
 
 function toElement(paragraphs: string[]) {
   return paragraphs.map((paragraph) => {
+    if (paragraph.startsWith("![[")) return (
+      <div className="flex flex-col items-center justify-center mb-4">
+      <div className=" mb-5">----------------</div>
+      <Image alt="tmp" key="img" width={500} height={500} src={"/" + paragraph.trim().slice(3, -2)}></Image>
+      <div className="text-center mt-5">----------------</div>
+      </div> 
+    )
     if (!paragraph.startsWith("$CODE$:")) return (
         <p className={pTagClassNames}>
           {paragraph}
@@ -79,7 +87,7 @@ function insertBold(element: ReactElement<ParagraphProps>): ReactElement<Paragra
   
   const newChildren: ReactElement<ParagraphProps>[] = element.props.children.split(/(\*\*.*?\*\*)/g)
   .map((textPart, index) => {
-    if (!textPart.startsWith("**")) return (<Fragment key={index}>{textPart}</Fragment>)
+    if (!textPart.startsWith("**")) return (<Fragment key={`${index}-bold-frag`}>{textPart}</Fragment>)
     return (<b key={index}>{textPart.slice(2, -2)}</b>)
   })
   
@@ -92,8 +100,8 @@ function insertSnippets(element: ReactElement<ParagraphProps>): ReactElement<Par
   
   const newChildren: ReactElement<ParagraphProps>[] = element.props.children.split(/(`.*?`)/g)
   .map((textPart, index) => {
-    if (!textPart.startsWith("`")) return (<Fragment key={index}>{textPart}</Fragment>)
-    return (<HighlightedCode key={index} language="inline">{textPart}</HighlightedCode>)
+    if (!textPart.startsWith("`")) return (<Fragment key={`${index}-snip-frag`}>{textPart}</Fragment>)
+    return (<HighlightedCode key={`${index}-hl`} language="inline">{textPart}</HighlightedCode>)
   })
   
   if (newChildren.length === 1) return element
@@ -121,32 +129,45 @@ function insertLinks(element: ReactElement<ParagraphProps>): ReactElement<Paragr
 
 function recurseModifyTree(
   elements: ReactElement<ParagraphProps>[],
-  insertFn: (element: ReactElement<ParagraphProps>) => ReactElement<ParagraphProps>): ReactElement<ParagraphProps>[] {
+  insertFn: (element: ReactElement<ParagraphProps>) => ReactElement<ParagraphProps>,
+  keyIndex: number = 0,
+  wrapIn: string = "p"): ReactElement<ParagraphProps>[] {
 
   if (!Array.isArray(elements) || !elements.every((e) => isValidElement(e))) return elements
-  
   const isStrChild = (element: ReactElement<ParagraphProps>) =>
     typeof element.props.children === "string"
   const isPTag     = (element: ReactElement<ParagraphProps>) =>
     element.type === "p"
-
+  
   if (!elements.some(isPTag)) {
-
+ 
     let newChildren = []
-    if (elements.every(isStrChild)) newChildren = elements.map((element) => insertFn(element))
-    else  newChildren = recurseModifyTree(elements, insertFn)
-     
+    if (elements.every(isStrChild)){
+      // console.log("String child underneath none p tag:", elements)
+      newChildren = elements.map((element) => insertFn(element))
+    }
+    else {
+     // console.log("No string child under none p tag:", elements.flat())
+     const elementsFlat = elements.flatMap((e: any) => {
+       if (!Array.isArray(e.props.children)) return e
+       return e.props.children
+     })
+     newChildren = recurseModifyTree(elementsFlat, insertFn, keyIndex + 1, "frag")
+    }
+
+    if (wrapIn === "frag") return [(<Fragment key={keyIndex}>{newChildren}</Fragment>)]
+    
     return [(
-      <p className={pTagClassNames}>
+      <p key={keyIndex} className={pTagClassNames}>
         {newChildren}
       </p>
     )]
   }
   return elements.flatMap((element: ReactElement<ParagraphProps>) => {    
-    if (!isValidElement(element) || element.type === "div") return element 
+    if (!isValidElement(element) || element.type === "div" || element.key === "img") return element 
     if (typeof element.props.children === "string") return insertFn(element)
 
-    return recurseModifyTree(element.props.children, insertFn)
+    return recurseModifyTree(element.props.children, insertFn, keyIndex + 1)
   })
 }
 
