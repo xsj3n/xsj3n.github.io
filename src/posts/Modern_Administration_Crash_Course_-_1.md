@@ -22,7 +22,7 @@ Before we can get to setting up the domain controllers for AD, Proxmox will need
 
 I am a proponent of Nix, so I will supply the development shell `flake.nix` that I will be using for this project [here](https://github.com/xsj3n/AD-IaC-Lab/blob/main/flake.nix).
 
-If you do use Nix, then just know you'll want to install the following before proceeding:
+If you are not going to use Nix, then just know you'll want to install the following before proceeding:
 - Python
 
 - Ansible
