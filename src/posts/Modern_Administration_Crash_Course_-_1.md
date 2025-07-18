@@ -1,4 +1,4 @@
-Laying the ground work for a hybrid AD, IaC home lab on Proxmox. We'll setup the Terraform provider for Proxmox and an early form of secrets management suited for a single contributor. Also, we'll do the manual work required to prepare a baseline Windows 2025 image for use in our deployment.
+Laying the ground work for a hybrid AD, IaC home lab on Proxmox. We'll setup the Terraform provider for Proxmox and an early form of secrets management suited for a single contributor. Also, we'll do the manual work required to prepare a baseline Windows 2025 image for use in the deployment.
 ---
 7/18/2025
 ---

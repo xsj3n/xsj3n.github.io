@@ -5,6 +5,9 @@ import { sfMono } from "@/components/fonts";
 
 export const metadata: Metadata = {
   title: "xsj3n",
+  icons: {
+    icon: [{ url: "/favicon.png"}]
+  },
   description: "muh blog",
 };
 
