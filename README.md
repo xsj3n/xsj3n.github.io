@@ -1,3 +1,3 @@
 # TODO:
-- Fix theme change occuring on window resize breakpoint for mobile
-- Socials icon pop right out the designated box under certain dimensions 
+- Code highlighting flashes to light mode
+- Transistion the highlighting blocks to use bold instead, and gice it a rounded border
