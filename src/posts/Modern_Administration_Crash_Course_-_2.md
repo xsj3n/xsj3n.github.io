@@ -10,7 +10,7 @@ Before we can do that, the `terraform init` command needs to be ran. To quote th
 
 A `.terraform` directory will be created, downloads provider dependencies, and installs referenced modules. The init command technically does a few other things, but we can go over that at a later date.
 
-Microsoft recommends having at least two domain controllers, most obviously for availability reasons, but additionally as it's become convention to split the flexible single master operations (FSMO) between domain controllers. Deploying multiples of the same resource in Terraform can accomplished via the `count` meta-argument. If you set it to 2, then 2 of those resources will deployed.
+Microsoft recommends having at least two domain controllers, most obviously for availability reasons, but additionally as it's become convention to split the flexible single master operations (FSMO) between domain controllers. Deploying multiples of the same resource in Terraform can be accomplished via the `count` meta-argument. If you set it to 2, then 2 of those resources will deployed.
 
 Here's what the declaration for the VMs looks like, which will be placed in a new `virtual_machine.tf` file:
 
@@ -59,7 +59,7 @@ resource "proxmox_virtual_environment_vm" "windows_2025_dc" {
 
 HCL (Hashicorp Configuration Language) is the language terraform files are written in. In my opinion, it's fairly straightforward to read, and in our case, nearly all of the fields directly correspond to Proxmox options. As you can see, CPU, memory, network, BIOS, and the target node to deploy these on are specified. 
 
-Resources cannot share a name, and virtual machines cannot share an ID in Proxmox. `count.index` can be referenced to introduce dynamic names and IDs. The two resources we deploy will end up being named `terraform-windows-2025-0` and `terraform-windows-2025-1`.
+Terraform resources cannot share a name, and Proxmox virtual machines cannot share the same ID. `count.index` can be referenced to introduce dynamic names and IDs. The two resources we deploy will end up being named `terraform-windows-2025-0` and `terraform-windows-2025-1`.
 
 **Note: Count is one of five meta-arguments. These arguments are available on every resource and control the behavior of resources instead of describing the infrastructure itself.**
 
@@ -135,7 +135,7 @@ proxmox_virtual_environment_vm.windows_2025_dc[1]: Creation complete after 29s [
 Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 ```
 
-After confirmation, we can see terraform begins reaching out to Proxmox to execute the deployment plan. Terraform does not provide much information as to the specifics of what it is doing during this period, which isn't particularly helpful if you are trying to debug a provider. 
+After confirmation, we can see terraform begins reaching out to Proxmox to execute the deployment plan. Terraform does not provide much information as to the specifics of what it is doing during this period, which isn't great if you are trying to debug a provider. 
 
 In case you need further insight into what the providers are doing during execution, the `TF_LOG` environmental variable can be set to `DEBUG`. There are multiple valid debug levels which can be passed to `TF_LOG`: `TRACE`, `INFO`, `WARN`, and `ERROR`. The output can be quite verbose, but thankfully the debug output can be streamed into a file instead of the console by passing a path to the `TF_LOG_PATH` environmental variable. 
 
@@ -154,7 +154,7 @@ root@pve0:~ qm list
        201 terraform-windows-2025-1 running    4048       32.00        2073759
 ```
 
-All seems to have went well with the deployment. Now we must concern ourselves with the next essential step to begin the automated configuration of these VMs, which is getting the IP addresses from them. The `proxmox_virtual_environment_vm` resource exposes a `ipv4_addresses` attribute to make collecting this information trivial, at least in theory. 
+All seems to have went well with the deployment. The next essential step to begin the automated configuration of these VMs is collecting the IP addresses from them. The `proxmox_virtual_environment_vm` resource exposes a `ipv4_addresses` attribute to make collecting this information trivial, at least in theory. 
 
 Run `terraform destroy`, which will stop and then delete the VMs which were just spun up. This will show the same diff and ask for the same input as `terraform apply`. 
 
@@ -212,13 +212,11 @@ ip_addrs = [
 
 Immediately, this does not look right, and for multiple reasons. Assuming a default Proxmox network configuration, each VM should be assigned an address directly from the ISP gateway device within your home. `169.254.x.x` type addresses are **link-local** addresses. When DHCP fails, or is absent, machine's automatically configure themselves with an address with this network prefix in an attempt to secure communications. It's basically a reserved network segment strictly for machines which were not assigned an IP address. 
 
-This insinuates a failure of sorts has occurred. However, when viewing the network information for one of the VMs in the Proxmox GUI, we can see that is not the case.
+This insinuates a failure of some sort has occurred. However, when viewing the network information for one of the VMs in the Proxmox GUI, we can see that is not the case.
 
 ![[netinfo.png]]
 
-`terraform-windows-2025-0` was assigned a valid address of `192.168.0.105`. So, what's the issue here? The server takes too long to boot and be assigned an address. The provider's implementation for waiting network information is a bit brittle for our purposes. It is fully willing to return the first address reported as long as its not the loopback address. 
-
-This may be due to my gateway taking an unexpectedly long time to assign an address to the VMs or it could also be the the Window's implementation of the QEMU guest agent which takes too long as the service seems to restart itself after being active for a bit. Perhaps it is an issue with the `bpg/proxmox` provider's implementation is wholly to blame. Either way, going down the rabbit hole of troubleshooting this issue could quickly turn into its own post. Thankfully, is an alternative.
+`terraform-windows-2025-0` was assigned a valid address of `192.168.0.105`. So, what's the issue here? This may be due to my gateway taking an unexpectedly long time to assign an address to the VMs. It could be that the implementation of the QEMU guest agent on Windows takes too long to share its IP, as the service seems to restart itself after being active for a bit before reporting. Perhaps the `bpg/proxmox` provider's implementation is wholly to blame. Either way, going down the rabbit hole of troubleshooting this issue could quickly turn into its own post. Thankfully, there is an alternative.
 
 Terraform does provide the spackle which can be used to fill in the cracks of your automation pipeline. This comes in the form of provisioners. They allow an admin to execute arbitrary code locally, remotely, or place files. We'll be using the `local-exec` provisioner. Their use is heavily discouraged as they exist outside of Terraform's scope of management. Once again, to quote the [documentation](https://developer.hashicorp.com/terraform/language/resources/provisioners/syntax):
 
@@ -418,7 +416,7 @@ Per the [documentation](https://registry.terraform.io/providers/hashicorp/local/
 
 When the deployment is executed, `ipinfo.cfg` will be produced from the script we wrote, this resource will read it in, and then overwrite it with the same content. This functionality is specified in the documentation for the `filename` argument for the resource. 
 
-Now, when the destroy command is ran, the file containing IP information will be destroyed as well. This is good, but we still cannot reference the content of the file within Terraform as `local_file.ip_info` does not expose it. In order to do so, a data source block will be needed. 
+Now, when the destroy command is ran, the file containing IP information will be destroyed as well. This is good, but the content of the file isn't accessible under `local_file.ip_info`. Designed primarily to manage file presence and location, the `local_file` resource does not expose the content of the file. In order to acess the contents, a data source block will be needed. 
 
 As for what data sources are, they "allow Terraform to use information defined outside of Terraform." This could be data held remotely by a cloud vendor, a local file on disk, and more. All we need to do is read a local file, which can be done this short addition:
 
@@ -438,7 +436,7 @@ There is a `file()` function which can also retrieve the contents of a file, but
 
 - **State Update**: New state is written to `terraform.tfstate`, and the old state is sent to moved to `terramform.tfstate.backup`.
 
-By using a data source, Terraform will form a dependency link between `data.local_file.ip_info` and `local_file.ip_info`. Effectively, this allows us to read a file which will be available during the execution phase, even if Terraform can validate its existence during the generation of the execution plan.
+By using a data source, Terraform will form a dependency link between `data.local_file.ip_info` and `local_file.ip_info`. Effectively, this allows us to read a file which will be available during the execution phase, even if Terraform cannot validate its existence during the generation of the execution plan.
 
 By providing the path of the file to read, its contents will become available underneath the data namespace. We can now update the output block defined prior to finally yield the desired results.
 
@@ -469,11 +467,11 @@ windows_2025_dc_ip_addresses = {
 }
 ```
 
-Nice, it works as expected. Sadly, as the provisioners documentation warned, this injected a decent deal of complexity into the deployment. With all that done though, we have managed to bring an arbitrary file under the control of the pipeline. Though this detour was unexpected, it provided a good opportunity to explore some additional facets of Terraform. As this post has gotten quite long, I'll go ahead bring this to a close.
+Nice, it works as expected. Sadly, as the provisioners documentation warned, this injected a decent deal of complexity into the deployment. With that completed, we've managed to bring an arbitrary file under Terraform's control. Though this detour was unexpected, it provided a good opportunity to explore some additional facets of Terraform. As this post has gotten quite long, I'll go ahead and bring this to a close.
 
 However, before ending this post, I'll be moving the `windows_2025_dc_ip_addresses` output block to it's own file, `outputs.tf`. I'm doing this mainly to do things organized, in anticipation of adding further outputs down the line.
 
-So, that's all I have for now. I'll leave you with what the project directory should look like look. Until next time, where'll start incorporating Ansible.
+So, that's all I have for now. I'll leave you with what the project directory should look like. Until next time, where'll start incorporating Ansible.
 
 ```bash
 ├── .git
