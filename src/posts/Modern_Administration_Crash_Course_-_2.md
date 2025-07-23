@@ -4,13 +4,13 @@ The focus in this post is mainly on Terraform, explaining some of the core behav
 ---
 Last time, we did all the required setup for Terraform, plus made the Windows VM template. In this post, we can get right into defining the HCL code to deploy the VMs. 
 
-To get started, we will need to utilize the `proxmox_virtual_environment_vm` resource from the `bpg/proxmox` provider. A Terraform resource "describes one more more infrastructure objects, such as virtual networks, compute instances, or even DNS records." So, what must be done seems to be rather straight forward: refer, to the [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_vm) for the resource, and write the configuration according to our needs.
+To get started, we will need to utilize the `proxmox_virtual_environment_vm` resource from the `bpg/proxmox` provider. A Terraform resource "describes one more infrastructure objects, such as virtual networks, compute instances, or even DNS records." So, what must be done seems to be rather straight forward: refer, to the [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_vm) for the resource, and write the configuration according to our needs.
 
 Before we can do that, the `terraform init` command needs to be ran. To quote the documentation, this command "initializes a working directory containing Terraform configuration files. This is the first command you should run after writing a new Terraform configuration or cloning an existing configuration from version control. It is safe to run this command multiple times."
 
 A `.terraform` directory will be created, downloads provider dependencies, and installs referenced modules. The init command technically does a few other things, but we can go over that at a later date.
 
-Microsoft recommends having at least two domain controllers, most obviously for availability reasons, but additionally as it's become convention to split the flexible single master operations (FSMO) between domain controllers. Deploying multiples of the same resource in Terraform can be accomplished via the `count` meta-argument. If you set it to 2, then 2 of those resources will deployed.
+Microsoft recommends having at least two domain controllers, most obviously for availability reasons, but additionally as it's become convention to split the flexible single master operation (FSMO) roles between domain controllers. Deploying multiples of the same resource in Terraform can be accomplished via the `count` [meta-argument](https://developer.hashicorp.com/terraform/language/meta-arguments/count). If you set it to 2, then 2 of those resources will deployed.
 
 Here's what the declaration for the VMs looks like, which will be placed in a new `virtual_machine.tf` file:
 
@@ -252,7 +252,7 @@ echo "Found VM $id IP: $ip"
 
 Here, a while loop is used along with the test command (`[ ]`), utilizing the `-z` flag to continually check if `$ip` is null. Once a non-null value in `$ip` is detected at the start of the loop, it will break. 
 
-Inside of this loop, we use to query the API. The `-s` flag is to keep curl from producing console output before returning, `-k` tells curl to ignore SSL certificate errors (Proxmox default installations have a self-signed certificate), and `-H` is used to include a HTTP header to pass the API token in. 
+Inside of this loop, we use curl to query the API. The `-s` flag is to keep curl from producing console output before returning, `-k` tells curl to ignore SSL certificate errors (Proxmox default installations have a self-signed certificate), and `-H` is used to include a HTTP header to pass the API token in. 
 
 The Proxmox API will return this network information in JSON.
 
@@ -339,7 +339,7 @@ After piping the curl output to `jq -r`, the return value is saved to `$ip`. The
 
 Allow me to explain `jq` selector which follows the `-r` flag:
 
-- `.data.result[0]` selects the first item is the array of result, under the top level data object. The first item is the object representing the Ethernet adapter. 
+- `.data.result[0]` selects the first item in the array of `result` objects, under the top level data object. The first item is the object representing the Ethernet adapter. 
 
 - `."ip-addresses[3]"` selects the fourth item in the array of addresses under the Ethernet object, which always seems to the IPv4 address. 
 
@@ -347,7 +347,7 @@ Allow me to explain `jq` selector which follows the `-r` flag:
 
 With that bit of parsing done, `[[ ${ip:0:3} -eq 169 ]] && ip=""` checks the retrieved IP to make sure it is not a link-local address. If it is, then `$ip` is reset to null before sleeping for ten seconds, to ensure the loop continues.
 
-Virtual machine IDs will need to be mapped to IP addresses, so before outputting this information to a file. 
+Virtual machine IDs will need to be mapped to IP addresses before outputting this information to a file:
 
 ```bash
 json=$(jq -n \
@@ -380,7 +380,7 @@ In order to ensure reliability, we can utilize a common OS mechanism, file locki
 
 As far as what occurs while the lock is held, the path inside `$cfg_file` is checked to see if there is a file there with a size over 0. If nothing is there, an empty JSON object is created there. `jq` is used to initialize a `ip_addrs` field if one does not exist, before appending the new `$json` object inside inside it, outputting it to a temp file, and then overwriting the IP address configuration file. 
 
-With that in place, the scripts should all wait their turn, before modifying the file. Inside of `virtual_machines.tf`,  within the `windows_2025_dc` resource, a provision block can be added to execute the script for network information collection. 
+With that in place, the scripts should all wait their turn, before modifying the file. Inside of `virtual_machines curl.tf`,  within the `windows_2025_dc` resource, a provision block can be added to execute the script for network information collection. 
 
 ```hcl
 resource "proxmox_virtual_environment_vm" "windows_2025_dc" {
@@ -398,7 +398,7 @@ resource "proxmox_virtual_environment_vm" "windows_2025_dc" {
 }
 ```
 
-Inside of the `local-exec` provisioner, the script can be set to run for the resource(s). When the deployment is ran, this will produce a file with the desired information, but that's not quite good enough. This file, and it's management, now fall outside of the the automation pipeline. Let's see how we can bring the file under the management of the pipeline.
+Inside of the `local-exec`  curlprovisioner, the script can be set to run for the resource(s). When the deployment is ran, this will produce a file with the desired information, but that's not quite good enough. This file, and it's management, now fall outside of the the automation pipeline. Let's see how we can bring the file under the management of the pipeline.
 
 Ideally, whenever `terraform destroy` is ran, the `ipinfo.cfg` file will also be destroyed. This can be accomplished with `local_file` resource, which is within the Hashicorp provider namespace. It's implicitly available within every Terraform project, so there is no need to add it to `versions.tf`. 
 
@@ -469,7 +469,7 @@ windows_2025_dc_ip_addresses = {
 
 Nice, it works as expected. Sadly, as the provisioners documentation warned, this injected a decent deal of complexity into the deployment. With that completed, we've managed to bring an arbitrary file under Terraform's control. Though this detour was unexpected, it provided a good opportunity to explore some additional facets of Terraform. As this post has gotten quite long, I'll go ahead and bring this to a close.
 
-However, before ending this post, I'll be moving the `windows_2025_dc_ip_addresses` output block to it's own file, `outputs.tf`. I'm doing this mainly to do things organized, in anticipation of adding further outputs down the line.
+However, before ending this post, I'll be moving the `windows_2025_dc_ip_addresses` output block to it's own file, `outputs.tf`. I'm doing this mainly to keep things organized in anticipation of adding further outputs down the line.
 
 So, that's all I have for now. I'll leave you with what the project directory should look like. Until next time, where'll start incorporating Ansible.
 
