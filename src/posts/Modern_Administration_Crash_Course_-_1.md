@@ -314,8 +314,7 @@ The rest of the options will all be specified within the oobeSystem pass. Most i
 </component>
 ```
 
-**Note: If you cannot enter special characters for the admin password due to noVNC not detecting the shift key, do not fret. The produc**
-ed answer file can be edited in a text editor, as it's just XML. Just make sure to set `<PlainText>` to true when you do. All that option does is base64 encode your password, and we will be encrypting our answer file at rest anyways. 
+**Note: If you cannot enter special characters for the admin password due to noVNC not detecting the shift key, do not fret. The produced answer file can be edited in a text editor, as it's just XML. Just make sure to set** `<PlainText>` **to true when you do. All that option does is base64 encode your password, and we will be encrypting our answer file at rest anyways.**
 
 With that drab bit finished, save the final product by clicking File -> Save Answer File. 
 
