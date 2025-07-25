@@ -16,13 +16,14 @@ As for the software choices, the following will be used:
 
 - **Configuration automation**: Ansible will automate the configuration of the virtual machines deployed via Terraform.
 
-**Note**: In this writing, I will be assuming the reader possesses some knowledge of operating systems, scripting, and virtualization.
+**Note: In this writing, I will be assuming the reader possesses some knowledge of operating systems, scripting, and virtualization.**
 
 Before we can get to setting up the domain controllers for AD, Proxmox will need to be configured for Terraform. In order to do this, we will need to configure the Terraform Provider for Proxmox, after installing the tools we need.
 
 I am a proponent of Nix, so I will supply the development shell `flake.nix` that I will be using for this project [here](https://github.com/xsj3n/AD-IaC-Lab/blob/main/flake.nix).
 
 If you are not going to use Nix, then just know you'll want to install the following before proceeding:
+
 - Python
 
 - Ansible
@@ -33,7 +34,7 @@ If you are not going to use Nix, then just know you'll want to install the follo
 
 - sshpass
 
-Once that is all installed, we'll make a new directory for this project, `AD-IaC-Lab`, and then `git init && git branch -M main` within the director to setup the local git repository. 
+Once that is all installed, we'll make a new directory for this project, `AD-IaC-Lab`, and then `git init && git branch -M main` within the directory to setup the local git repository. 
 
 The documentation for Terraform providers states the following:
 
@@ -87,7 +88,7 @@ There may be some confusion regarding why the provider requires SSH access, and 
 
 As stated before, the purpose of scripting this was so I would not have to manually do so if I had to set up a PVE instance again. This will need to be modified later to accommodate additional nodes. For now, let's make a `bin/` directory and store our script in it.
 
-At this point, we can begin writing the Terraform files. The structure of a Terraform project is flexible; there is no specific names you must use for `.tf` files. However, there are conventions, and we will be using them.
+At this point, we can begin writing the Terraform files. The structure of a Terraform project is flexible; there are no specific names you must use for `.tf` files. However, there are conventions, and we will be using them.
 
 First, let us define a `versions.tf` file. Within the file, we will specify the the versions of the providers & of Terraform required to run the Terraform project. We will need the `bpg/proxmox` & `ansible/ansible` providers.
 
@@ -124,7 +125,7 @@ variable "ve_endpoint" {
 }
 ```
 
-Note that we do not actually provide a value for `api_token` and `pve_ssh_passwd`. This is because we will be providing the definition in a separate file, `secrets.auto.tfvars` (`.tfvars` are variable definition files). 
+Notehat we do not actually provide a value for `api_token` and `pve_ssh_passwd`. This is because we will be providing the definition in a** separate file, `secrets.auto.tfvars` (`.tfvars` are variable definition files). 
 
 ```json 
 api_token = "xxxxxxxx"
@@ -169,7 +170,8 @@ At this point, our project directory should have the following structure:
 └── versions.tf
 ```
 
-If you have ever automated a the deployment of Windows endpoints or servers, then you're aware we will need to prepare an answer file, commonly named `unattend.xml` file, and feed it to a Windows image. For the uninitiated, the purpose of an answer file is to provide answers to the various prompts for input during a Windows installation. 
+If you have ever automated a the deployment of Windows endpoints or servers, then you're aware we will need to prepare an answer file,
+commonly named `unattend.xml` file, and feed it to a Windows image. For the uninitiated, the purpose of an answer file is to provide answers to the various prompts for input during a Windows installation. 
 
 This will be one of the stints of manual work that needs to be done to get the automation ball rolling. 
 
@@ -193,7 +195,7 @@ When it comes time to select a disk for the OS to be installed on, you'll notice
 
 - `NetKVM\2k25\amd64`
 
-**Note:** When installing the vioserial driver, you may have to un-check the box which hides incompatible drivers. This is likely due to Windows not detecting a device which could currently utilize the driver.
+**Note* When installing the vioserial driver, you may have to un-check the box which hides incompatible drivers. This is likely due to Window**s not detecting a device which could currently utilize the driver.
 
 Once those are installed, we can continue the installation as normal then set the administrator password as normal.
 
@@ -203,7 +205,8 @@ If you're running Linux, then it'll be most convenient to do this step on the VM
 
 Upon opening up the Windows SIM, we first need to feed in the `install.wim` from our Windows server installation media by clicking File -> Select Windows distribution image. The `install.wim` file should be under located within the ISO at `SSS_X64FREE_EN-US_DV9\sources\install.wim`. 
 
-If you are doing this on the VM, then you will need to copy the wim file to another directory first, as the Windows SIM will not be able to read it off the mounted ISO. After feeding in the wim, it will take awhile as the catalog file is generated. The "Windows Image" pane should populate once it is done and we can begin to customize the answer file.
+If you are doing this on the VM, then you will need to copy the wim file to another directory first, as the Windows SIM will not be
+able to read it off the mounted ISO. After feeding in the wim, it will take awhile as the catalog file is generated. The "Windows Image" pane should populate once it is done and we can begin to customize the answer file.
 
 To get started, click File -> New Answer File. 
 
@@ -311,7 +314,8 @@ The rest of the options will all be specified within the oobeSystem pass. Most i
 </component>
 ```
 
-**Note**: If you cannot enter special characters for the admin password due to noVNC not detecting the shift key, do not fret. The produced answer file can be edited in a text editor, as it's just XML. Just make sure to set `<PlainText>` to true when you do. All that option does is base64 encode your password, and we will be encrypting our answer file at rest anyways. 
+**Note: If you cannot enter special characters for the admin password due to noVNC not detecting the shift key, do not fret. The produc**
+ed answer file can be edited in a text editor, as it's just XML. Just make sure to set `<PlainText>` to true when you do. All that option does is base64 encode your password, and we will be encrypting our answer file at rest anyways. 
 
 With that drab bit finished, save the final product by clicking File -> Save Answer File. 
 
@@ -321,11 +325,11 @@ After the VM is sysprep'd, it'll need to be turned into a template. All the Prox
 
 ![[remove_isos.png]]
 
-The QEMU guest agent needs to be enabled on the hypervisor host as well, so we'll enabled that as well on the soon-to-be template machine. It can be enabled underneath "Options" for the VM. 
+The QEMU guest agent needs to be enabled on the hypervisor host as well, so we'll enabled that on the soon-to-be template machine. It can be enabled underneath "Options" for the VM. 
 
 At this point, all that needs to be done is boot up the VM, cleanup if you installed the ADK directly onto it, and then sysprep it. However, before doing that, I recommend making a full clone of the VM in it's current state. I have observed difficulties with running sysprep on a VM again after it's been cloned from a template, and it'd be a shame to have to redo everything in the case something goes wrong. 
 
-With the backup VM created, the VM can be started back up again. Under the summary tab for the VM, network information should become available shortly after boot. Using this information, we can SSH into the machine to sysprep it. The answer file will be needed on the VM, and we'll want to keep a copy of it in the project repository. If you created the answer file on the VM as I did, then SCP file into the local repository:
+With the backup VM created, the VM can be started back up again. Under the summary tab for the VM, network information should become available shortly after boot. Using this information, we can SSH into the machine to sysprep it. The answer file will be needed on the VM, and we'll want to keep a copy of it in the project repository. If you created the answer file on the VM, then SCP file into the local repository:
 
 ```bash
 scp [OPTIONS] [[user@]src_host:]file1 [[user@]dest_host:]file2
