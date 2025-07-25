@@ -26,12 +26,12 @@ export default function HighlightedCode({language, children} : childrenProps) {
     }, [])
 
   if (language === "inline") return (
-     <em className="pr-[3px] pl-[3px]" style={{
+     <b className="pr-[3px] pl-[3px] rounded" style={{
       color: "rgb(127, 219, 202)",
       backgroundColor: isDark ? "#3d3c3d" : "#6d6969"
     }}>
       {strChild.slice(1, -1)}
-    </em>
+    </b>
     )
     
 
