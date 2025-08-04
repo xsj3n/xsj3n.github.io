@@ -400,7 +400,9 @@ resource "proxmox_virtual_environment_vm" "windows_2025_dc" {
 
 Inside of the `local-exec`  curlprovisioner, the script can be set to run for the resource(s). When the deployment is ran, this will produce a file with the desired information, but that's not quite good enough. This file, and it's management, now fall outside of the the automation pipeline. Let's see how we can bring the file under the management of the pipeline.
 
-Ideally, whenever `terraform destroy` is ran, the `ipinfo.cfg` file will also be destroyed. This can be accomplished with `local_file` resource, which is within the Hashicorp provider namespace. It's implicitly available within every Terraform project, so there is no need to add it to `versions.tf`. 
+Ideally, whenever `terraform destroy` is ran, the `ipinfo.cfg` file will also be destroyed. This can be accomplished with `local_file` resource, which is within the Hashicorp provider namespace.
+
+Terraform will implicitly add the `hashicorp/local` to the `.terraform.lock.hcl` file when used in our deployment, but it should be added to `versions.tf` to ensure reproducibility. The `.terraform.lock.hcl` file is what keeps track of dependencies within a Terraform project.
 
 Beneath the `proxmox_virtual_environment_vm` declaration, we can add the following:
 
