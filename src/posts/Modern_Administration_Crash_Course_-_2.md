@@ -392,7 +392,7 @@ resource "proxmox_virtual_environment_vm" "windows_2025_dc" {
 ...
 
   provisioner "local-exec" {
-    command = "./bin/get_network_info.sh ${var.api_token} ${count.index + 200} ./configuration/ipinfo.cfg"
+    command = "./bin/get_network_info.sh ${var.api_token} ${count.index + 200} ./configuration/ip_info.json"
   }
 
 }
@@ -400,7 +400,7 @@ resource "proxmox_virtual_environment_vm" "windows_2025_dc" {
 
 Inside of the `local-exec`  curlprovisioner, the script can be set to run for the resource(s). When the deployment is ran, this will produce a file with the desired information, but that's not quite good enough. This file, and it's management, now fall outside of the the automation pipeline. Let's see how we can bring the file under the management of the pipeline.
 
-Ideally, whenever `terraform destroy` is ran, the `ipinfo.cfg` file will also be destroyed. This can be accomplished with `local_file` resource, which is within the Hashicorp provider namespace.
+Ideally, whenever `terraform destroy` is ran, the `ip_info.js` file will also be destroyed. This can be accomplished with `local_file` resource, which is within the Hashicorp provider namespace.
 
 Terraform will implicitly add the `hashicorp/local` to the `.terraform.lock.hcl` file when used in our deployment, but it should be added to `versions.tf` to ensure reproducibility. The `.terraform.lock.hcl` file is what keeps track of dependencies within a Terraform project.
 
@@ -408,15 +408,15 @@ Beneath the `proxmox_virtual_environment_vm` declaration, we can add the followi
 
 ```hcl
 resource "local_file" "ip_info" {
-  filename   = "./configuration/ipinfo.cfg"
-  source     = "./configuration/ipinfo.cfg"
+  filename   = "./configuration/ip_info.jso"
+  source     = "./configuration/ip_info.jso"
   depends_on = [proxmox_virtual_environment_vm.windows_2025_dc]
 }
 ```
 
 Per the [documentation](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file), the purpose of this resource type is to "Generate a local file with the given content." `filename` specifies the file we want to create. To specify what the file will contain, there is three mutually exclusive arguments, `source`, `content`, or `content_base64`. Seeing as we need to pass in a file, we will use the first option.
 
-When the deployment is executed, `ipinfo.cfg` will be produced from the script we wrote, this resource will read it in, and then overwrite it with the same content. This functionality is specified in the documentation for the `filename` argument for the resource. 
+When the deployment is executed, `ip_info.js` will be produced from the script we wrote, this resource will read it in, and then overwrite it with the same content. This functionality is specified in the documentation for the `filename` argument for the resource. 
 
 Now, when the destroy command is ran, the file containing IP information will be destroyed as well. This is good, but the content of the file isn't accessible under `local_file.ip_info`. Designed primarily to manage file presence and location, the `local_file` resource does not expose the content of the file. In order to acess the contents, a data source block will be needed. 
 
@@ -482,7 +482,7 @@ So, that's all I have for now. I'll leave you with what the project directory sh
 │   ├── get_network_info.sh
 │   └── proxmox_terraform_setup.sh
 ├── configuration
-│   └── ipinfo.cfg
+│   └── ip_info.js
 ├── dc_unattend.xml
 ├── flake.lock (if you are using nix)
 ├── flake.nix  (if you are using nix)
