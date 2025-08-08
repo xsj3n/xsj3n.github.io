@@ -603,7 +603,7 @@ This likely occurred before the DC registered its DNS records and can be safely 
 
 To ensure DNS is working as expected, `dcdiag /test:dns` can be ran. If all goes well, then it should report that your domain has passed the DNS test.
 
-There's the ADFS and ADCS servers to set up next, but first we'll be contextualizing what we've learned into an actual pipeline. So, the next will be
-automating the deployment of an Azure DevOps instance.
+There's the ADFS and ADCS servers to set up next, but first we're going to take a step back and focus on networking. It's for the best that we iron out the networking configuration further before things get more complex.
+
 
 The full repository for this project can be found [here](https://github.com/xsj3n/AD-IaC-Lab).
