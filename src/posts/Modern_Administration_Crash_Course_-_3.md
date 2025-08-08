@@ -2,7 +2,7 @@ With all of the work needed to deploy the virtual machines done, this post cente
 ---
 8/7/2025
 ---
-Prior posts in the series were mainly concerned with the Proxmox, reproducible infrastructure deployments, and reliably collecting network information from the said infrastructure. Moving forward, we'll focus on hooking Ansible into Terraform to enable the configuration of the deployed virtual machines. 
+Prior posts in the series were mainly concerned with Proxmox, reproducible infrastructure deployments, and reliably collecting network information from the said infrastructure. Moving forward, we'll focus on hooking Ansible into Terraform to enable the configuration of the deployed virtual machines. 
 
 The last thing we did was output the collected IP addresses to console for validation. Now we want to actually utilize these values within Terraform. To facilitate this, let's add the following to `variables.tf`: 
 
