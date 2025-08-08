@@ -602,3 +602,8 @@ Last error: 1908 (0x774):
 This likely occurred before the DC registered its DNS records and can be safely ignored. Just make sure the timestamps on the successful replications confirms this.
 
 To ensure DNS is working as expected, `dcdiag /test:dns` can be ran. If all goes well, then it should report that your domain has passed the DNS test.
+
+There's the ADFS and ADCS servers to set up next, but first we'll be contextualizing what we've learned into an actual pipeline. So, the next will be
+automating the deployment of an Azure DevOps instance.
+
+The full repository for this project can be found [here](https://github.com/xsj3n/AD-IaC-Lab).
