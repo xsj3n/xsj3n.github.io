@@ -116,7 +116,7 @@ resource "ansible_host" "windows_2025_dc" {
 }
 ```
 
-Inventory files specify more than just the addresses or hostnames of machines, they also contain other details required for Ansible to connect to them. Anything else which needs to be passed from Terraform to Ansible can added. These other connection details such as credentials and shell type are specified under `variables`. Due to targeting Windows machines, `ansible_shell_type` must be set to powershell as Ansible defaults to bash for the shell type. After another `terraform apply` to update the configuration, everything should be in place for the basic operation of Ansible.
+Inventory files specify more than just the addresses or hostnames of machines, they also contain other details required for Ansible to connect to them. Anything other values which need to be passed from Terraform to Ansible can added. These other connection details such as credentials and shell type are specified under `variables`. Due to targeting Windows machines, `ansible_shell_type` must be set to powershell as Ansible defaults to bash for the shell type. After another `terraform apply` to update the configuration, everything should be in place for the basic operation of Ansible.
 
 **Note: The** `ansible-inventory --list` **command can be ran to view your ansible inventory. Often useful in troubleshooting.**
 
@@ -160,7 +160,7 @@ Before promoting any servers to domain controllers, let's use the `ansible.windo
       when: result.reboot_required
 ```
 
-The conditional statement in the `name` field can be read as "if the current hostname is equal to the hostname of server one, then name it DC_0, otherwise name it DC_1". There is a few [special variables](https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html) within the conditional.
+The conditional statement in the `name` field can be read as "if the current hostname is equal to the hostname of server one, then name it DC_0, otherwise name it DC_1". There are a few [special variables](https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html) within the conditional.
 
 `inventory_hostname` is the "inventory name for the ‘current’ host being iterated over in the play." When running a task against multiple hosts, it can be used to change the input to a module per host. 
 
@@ -218,7 +218,8 @@ Lastly, you'll almost always want your domain controllers to run the DNS service
 
     - name: Promote Server into DC
       microsoft.ad.domain_controller:
-		dns_domain_name: "{{ hostvars[dc_0]['domain'] }}"
+        state: "domain_controller"
+        dns_domain_name: "{{ hostvars[dc_0]['domain'] }}"
         domain_mode: Win2025
         forest_mode: Win2025
         domain_netbios_name: "{{ hostvars[dc_0]['netbios'] }}"
@@ -276,7 +277,7 @@ Now `ansible_provisioning.tf` can be edited to pass the IPv6 address to Ansible.
 
 With that done `"{{ hostvars[dc_0]['ansible_host6']}}"` can be added to the list of DNS servers for DC_1. 
 
-As stated prior, once subsequent domain controller are promoted, a successful replication must occur before moving on to DNS configuration. This can be accounted for by using the `ansible.builtin.pause` module:
+As stated prior, once subsequent domain controllers are promoted, a successful replication must occur before moving on to DNS configuration. This can be accounted for by using the `ansible.builtin.pause` module:
 
 ```yml
 - name: Prepare DC_0 for DNS Configuration
@@ -591,7 +592,7 @@ Using another null resource provisioner, we can simply delete the file after the
 
 A meta-argument, [lifecycle](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes), can be added to `local_file.ip_info_file` to resolve this issue. By specifying `ignore_changes = all`, Terraform can be configured to not update the resource, but it can still create/destroy it. With that addition, everything can be run quite smoothly and securely with with `terrraform apply/destroy`. 
 
-After running the deployment, I recommend SSHing into the second DC to ensure replication & DNS are worked as expected. `repadmin /showrepl` can be used to confirm all partitions are replicating. You may see an error that says this at the bottom of the output:
+After running the deployment, I recommend SSHing into the second DC to ensure replication & DNS are working as expected. `repadmin /showrepl` can be used to confirm all partitions are replicating. You may see an error that says this at the bottom of the output:
 
 ```bash
 ******* 1 CONSECUTIVE FAILURES since 2025-08-07 21:07:31
