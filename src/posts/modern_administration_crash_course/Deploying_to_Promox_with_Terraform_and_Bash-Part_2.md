@@ -1,6 +1,6 @@
 The focus in this post is mainly on Terraform, explaining some of the core behaviors & tools within Terraform. A bit of bash scripting is included as well, mainly to circumvent an unexpected problem with the Terraform deployment.  
 ---
-7/20/2025
+7/20/2025|Bash,Terraform
 ---
 Last time, we did all the required setup for Terraform, plus made the Windows VM template. In this post, we can get right into defining the HCL code to deploy the VMs. 
 

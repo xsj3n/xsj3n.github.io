@@ -176,17 +176,35 @@ function recurseModifyTree(
 export default async function PostPage({params}: PostProps) {
   const blogParams = await params;
   const dirPath = path.join(process.cwd(), "src", "posts")
-  const files = await fs.readdir(dirPath)
-  const fileNameMatch = files.filter(fileName => fileName.split(".")[0] === blogParams.blog)
+  const dirs = await fs.readdir(dirPath)
+  const filesWithPrefix: [string, string[]][] = (await Promise.all(
+    dirs.map(async (dir) => {
+      const blogDirPrefix = path.join(dirPath, dir)
+      const files = await fs.readdir(blogDirPrefix)
+      return [blogDirPrefix, files] 
+    })
+  ))
 
-  if (!fileNameMatch.length) return (<div></div>)
-  const fileName = fileNameMatch[0]
-  const allContentSplit = (await fs.readFile(path.join(dirPath, fileName), "utf8")).split("---")
+  let pathAndFileName: [string, string] | null = null
+  const isMatch = (name: string) => name.split(".")[0] === blogParams.blog
+  filesWithPrefix.forEach(([prefix, fileNames]) => {
+    const index = fileNames.findIndex(isMatch)
+    console.log(index)
+    if (index !== -1) {
+      pathAndFileName = [prefix, fileNames[index]]
+    }
+  })
+  
+  if (pathAndFileName === null) return (<div>match failure!</div>)
+  const [prefix, fileName]: [string, string] = pathAndFileName
+  const allContentSplit = (await fs.readFile(path.join(prefix, fileName), "utf8")).split("---")
   let post = {
     date: allContentSplit[1],
     content: allContentSplit[2],
     title: fileName.split("_").join(" ").split(".")[0].toUpperCase()
   }
+
+  console.log(post)
 
   post.content                   = encodeCodeSegments(post.content)
   const contentParagraphs        = post.content.split(/\n\n/)

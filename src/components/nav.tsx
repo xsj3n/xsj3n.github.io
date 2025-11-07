@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { FaGithub, FaUser } from "react-icons/fa";
 import { RiArrowDropDownLine } from "react-icons/ri";
-import { FaXTwitter } from "react-icons/fa6";
 import { fixedsysAlt } from "./fonts";
 import TextScroll from "./scrolling";
 import Image from "next/image";
@@ -38,18 +37,14 @@ function AboutMe({className}: aboutMeClassName) {
 
       <div className="flex flex-col items-center">
         <p className={`${fixedsysAlt.className} text-2xl`}> About Me: </p>
-        <Image src="/x_cr.jpg" width={76} height={76} alt="Profile Picture" className="rounded-full aspect-square object-cover border-2 border-black"/>
+        <Image src="/crona_2.jpg" width={76} height={76} alt="Profile Picture" className="rounded-full aspect-square object-cover border-2 border-black"/>
         <p className="p-3 md:text-[.88rem] abt-txt-resize xs-font">Hey, I'm Jin. My interests lie in operating systems, programming, networking, and the intersection of all these things within information security.</p>
       </div>
       
-      <div className="flex justify-between p-5">
+      <div className="flex justify-center p-5">
         <div className="flex gap-1 items-center">
           <FaGithub/>
           <a href="https://github.com/xsj3n" className={fixedsysAlt.className}>Github</a>
-        </div>
-        <div className="flex gap-1 items-center">
-          <FaXTwitter/>
-          <a href="https://x.com/3n_jin" className={`${fixedsysAlt.className}`}>Twitter</a>
         </div>
       </div>
   

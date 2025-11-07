@@ -1,6 +1,6 @@
 With all of the work needed to deploy the virtual machines done, this post centers around configuring them. We cover integrating Ansible with Terraform in a secure manner. A bit of bash scripting is in this one as well since IPv6 addresses must be accounted for. Additionally, as we are configuring domain controllers, we start to examine the requirements for Active Directory.
 ---
-8/7/2025
+8/7/2025|Ansible,Windows,Terraform
 ---
 Prior posts in the series were mainly concerned with Proxmox, reproducible infrastructure deployments, and reliably collecting network information from the said infrastructure. Moving forward, we'll focus on hooking Ansible into Terraform to enable the configuration of the deployed virtual machines. 
 
