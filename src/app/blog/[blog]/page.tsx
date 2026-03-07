@@ -4,6 +4,7 @@ import { fixedsysAlt } from "@/components/fonts";
 import { cloneElement, Fragment, isValidElement, ReactElement } from "react";
 import HighlightedCode from "@/components/highlight";
 import Image from "next/image";
+import TagBubbles from "@/components/tag_bubbles"
 
 const pTagClassNames = "mb-3 sm:text-[.95rem] text-[0.90rem]"
 export async function generateStaticParams() {
@@ -216,14 +217,15 @@ export default async function PostPage({params}: PostProps) {
   const linkedElements           = recurseModifyTree(highlightedElements, insertLinks)
   
   return (
-    <div className="dark:bg-dark-secondary bg-secondary flex flex-col pr-10 pl-10 pt-5 sm:ml-15 sm:mr-15 ml-2 mr-2 mt-5">
+    <div className="dark:bg-dark-secondary bg-secondary flex flex-col pr-5 pl-5 pt-5 sm:ml-15 sm:mr-15 ml-2 mr-2 mt-5">
       <div className="flex flex-col text-center mb-10 gap-2">
         <h1 className={`${fixedsysAlt.className} text-2xl`}>{post.title}</h1>
-        <h3 className="font-bold">{post.date}</h3>
+        <h3 className="font-bold">{post.date.split("|")[0]}</h3>
+        <div className="font-bold">{TagBubbles(post.date.split("|")[1].split(","))}</div>
         <div>--------x--------</div>
       </div>  
        {linkedElements.map((children, index) =>
-         (<Fragment key={index}>{children}</Fragment>))
+         (<div key={index}>{children}</div>))
        }
     </div>
   )
