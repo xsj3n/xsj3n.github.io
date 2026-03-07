@@ -36,8 +36,8 @@ export default function HighlightedCode({language, children} : childrenProps) {
     
 
   return (
-    <SyntaxHighlighter language={language} style={isDark ? darkTheme : lightTheme } PreTag={({children})  => (
-      <pre className="bg-secondary dark:bg-dark-secondary overflow-auto">
+    <SyntaxHighlighter language={language} style={darkTheme} PreTag={({children})  => (
+      <pre className="bg-dark-secondary overflow-auto">
         {children}
       </pre>
     )}>

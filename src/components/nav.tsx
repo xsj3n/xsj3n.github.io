@@ -7,7 +7,6 @@ import TextScroll from "./scrolling";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import LightSwitch from "./switch";
 
 
 interface ChildProp {children: React.ReactNode}
@@ -17,11 +16,10 @@ interface ChildProp {children: React.ReactNode}
 interface BannerProps {className?: string}
 function Banner({className}: BannerProps) {
   return (
-    <div className={`h-[90px] bg-secondary dark:bg-dark-secondary dark:text-white ${className} shadow`} >
+    <div className={`h-[90px] bg-dark-secondary text-white ${className} shadow`} >
       <TextScroll text="----x----" className="justify-center flex" width="w-full" textReplications={12}/>
       <div className="flex justify-center gap-2">
-        <Link href="/"><h2 className="font-bold mt-1">Netlink Shrine</h2></Link>
-        <LightSwitch/>
+        <Link href="/"><h2 className="font-bold mt-1">✧ Netlink Shrine ✧</h2></Link>
       </div>
       <TextScroll text="----x----" className="justify-center flex" width="w-full" textReplications={12}/>  
     </div>
@@ -33,7 +31,7 @@ function Banner({className}: BannerProps) {
 interface aboutMeClassName { className?: string}
 function AboutMe({className}: aboutMeClassName) {
    return (
-    <div className={`bg-secondary dark:bg-dark-secondary transistion transistion-all duration-500 ease-out ${className} shadow`}>
+    <div className={`bg-dark-secondary transistion transistion-all duration-500 ease-out ${className} shadow`}>
 
       <div className="flex flex-col items-center">
         <p className={`${fixedsysAlt.className} text-2xl`}> About Me: </p>
@@ -57,7 +55,7 @@ function AboutMe({className}: aboutMeClassName) {
 function MobileNav({children}: ChildProp) {
   const isRoot = usePathname() === "/"
   
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
   const dropDownButton = (
     <div className="bg-secondary dark:bg-dark-secondary h-7 flex items-center justify-center mt-2 ml-2 mr-2 shadow" onClick={() => setIsVisible(!isVisible)}>
       <FaUser className="ml-2" size={20}/> <RiArrowDropDownLine className={`-ml-2 transform transistion-transform duration-500 ease-out ${isVisible ? "rotate-180" : "rotate-0"}`} size={30}/>
@@ -65,7 +63,7 @@ function MobileNav({children}: ChildProp) {
   )
   
   return (
-  <div className="w-full bg-background dark:bg-dark-background dark:text-white">
+  <div className="w-full bg-dark-background text-white">
     <Banner/>
     { isRoot && dropDownButton}
     { isRoot && <AboutMe className={`${isVisible ? "opacity-100 max-h-2/5 p-2 ml-2 mr-2" : "opacity-0 max-h-0"} overflow-hidden shadow `}/>}
@@ -77,7 +75,7 @@ function DesktopNav({children}: ChildProp) {
   const isRoot = usePathname() === "/"
 
   return (
-  <div className="flex flex-col  w-full  items-center bg-background dark:bg-dark-background dark:text-white">
+  <div className="flex flex-col  w-full  items-center bg-dark-background text-white">
     <Banner className="shadow w-full"/>
     <div id="nav" className="w-7/8 h-full flex  h-full flex-col items-center">
       <div className="flex flex-row h-full sm:w-[775px] lg:w-[1200px]">

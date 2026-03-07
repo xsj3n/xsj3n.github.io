@@ -39,7 +39,7 @@ export default async function Posts() {
 
   // TODO: check for no series OR solo postings
   if (!allSeriesDirNames.filter(fileName => !fileName.startsWith(".")).length) return (
-    <div className="bg-secondary dark:bg-dark-secondary justify-center items-center flex flex-col h-2/5 m-2 p-2">
+    <div className="bg-dark-secondary justify-center items-center flex flex-col h-2/5 m-2 p-2">
       <h2 className={`${fixedsysAlt.className } text-2xl whitespace-nowrap`}>-------x-------</h2>
       <h2 className={`${fixedsysAlt.className } text-2xl `}>Nothing here... yet.</h2>
       <h2 className={`${fixedsysAlt.className } text-2xl whitespace-nowrap`}>-------x-------</h2>
