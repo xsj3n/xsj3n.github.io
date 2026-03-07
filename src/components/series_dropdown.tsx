@@ -27,7 +27,7 @@ export default function SeriesDropdowns(props: Series & {className?: string}){
     <div className={`${className ?? ""}  flex flex-col place-items-center shadow`} >
       <div className="flex flex-col place-items-center bg-secondary dark:bg-dark-secondary">
         <div className="flex" onClick={() => setIsVisble(!isVisible)}>
-          <div className={`${fixedsys.className} text-2xl`}>{seriesName}</div>
+          <div className={`${fixedsys.className} text-lg md:text-2xl text-center`}>{seriesName}</div>
           <div><RiArrowDropDownLine size={35} className={`transform transistion-transform duration-500 ease-out ${isVisible ? "rotate-0" : "rotate-90"}`}/></div>
         </div>
         <div className="md:text-[0.92rem]  xs-font mr-10 mb-5 mt-5 ml-10">{seriesSummary}</div>

@@ -11,7 +11,9 @@ export async function generateStaticParams() {
   const files = await fs.readdir(dirPath)
 
   if (!files.filter(fileName => !fileName.startsWith(".")).length) return [{blog: "not-found"}] 
-  return files.map(fileName => ({blog: fileName.split(".")[0]}))
+  const f = files.map(fileName => ({blog: fileName.split(".")[0]}))
+  console.log(f)
+  return f
 }
 
 interface PostProps {
