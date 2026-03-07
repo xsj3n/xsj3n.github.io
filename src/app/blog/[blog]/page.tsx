@@ -8,12 +8,11 @@ import Image from "next/image";
 const pTagClassNames = "mb-3 sm:text-[.95rem] text-[0.90rem]"
 export async function generateStaticParams() {
   const dirPath = path.join(process.cwd(), "src", "posts")
-  const files = await fs.readdir(dirPath)
-
-  if (!files.filter(fileName => !fileName.startsWith(".")).length) return [{blog: "not-found"}] 
-  const f = files.map(fileName => ({blog: fileName.split(".")[0]}))
-  console.log(f)
-  return f
+  const rawFilenames = await fs.readdir(dirPath, {encoding: 'utf8', withFileTypes: false, recursive: true})
+  const gitKeepAndDirsFilitered = rawFilenames.filter(fileName => !fileName.startsWith(".") && fileName.includes("/") && !fileName.includes("summary"))
+  const fileNames = gitKeepAndDirsFilitered.map(f => f.split("/")[1].split(".")[0] )
+  if (!fileNames.length) return [{blog: "not-found"}] 
+  return fileNames.map(fileName => ({blog: fileName.split(".")[0]}))
 }
 
 interface PostProps {
@@ -191,7 +190,7 @@ export default async function PostPage({params}: PostProps) {
   const isMatch = (name: string) => name.split(".")[0] === blogParams.blog
   filesWithPrefix.forEach(([prefix, fileNames]) => {
     const index = fileNames.findIndex(isMatch)
-    console.log(index)
+    //console.log(index)
     if (index !== -1) {
       pathAndFileName = [prefix, fileNames[index]]
     }
@@ -206,7 +205,7 @@ export default async function PostPage({params}: PostProps) {
     title: fileName.split("_").join(" ").split(".")[0].toUpperCase()
   }
 
-  console.log(post)
+  //console.log(post)
 
   post.content                   = encodeCodeSegments(post.content)
   const contentParagraphs        = post.content.split(/\n\n/)
