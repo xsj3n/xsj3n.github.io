@@ -2,9 +2,8 @@
 import { useState } from "react"
 import { Series } from "./posts"
 import { fixedsys } from "./fonts"
-import Link from "next/link"
 import { RiArrowDropDownLine } from "react-icons/ri"
-import TagBubbles from "@/components/tag_bubbles"
+import SinglePost from "@/components/single_posts"
 
 // the hyphe in the filename may be messing with the dynamic route, may have to adjust 
 export default function SeriesDropdowns(props: Series & {className?: string}){ 
@@ -21,16 +20,7 @@ export default function SeriesDropdowns(props: Series & {className?: string}){
         <div className="md:text-[0.92rem] text-sm mr-10 mb-5 mt-5 ml-10">{seriesSummary}</div>
       </div>
       {posts.map(({name, date, rawName, summary, tags}) => (
-        <div key={name} className={`${isVisible ? "opacity-100 max-h-4/5" : "opacity-0 max-h-0"} overflow-hidden bg-dark-secondary flex flex-col place-items-center shadow max-h-2/5 transistion transistion-all duration-500 ease-out`}>
-          <div className="flex flex-col text-center">
-            <div className={`${fixedsys.className} text-xl md:text-2xl`}><Link href={`/blog/${rawName.split(".")[0]}`}>{name}</Link></div>
-
-            <div className="text-sm">{date}</div>
-            {TagBubbles(tags)}
-            <div className="whitespace-nowrap">--------------------</div>
-          </div>
-          <p className="text-left md:text-[0.92rem]  text-sm mr-10 mb-5 mt-5 ml-10">{summary}</p>
-        </div> 
+           <SinglePost key={name} name={name} date={date} rawName={rawName} summary={summary} tags={tags} isVisible={isVisible} visibleModEnabled={true}/>
       ))}
     </div>
   )

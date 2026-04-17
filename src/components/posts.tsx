@@ -2,7 +2,8 @@ import {promises as fs} from 'fs'
 import path from "path"
 import { fixedsys, fixedsysAlt } from './fonts'
 import Link from 'next/link'
-import SeriesDropdowns from './series_dropdown'
+import SeriesDropdowns from "@/components/series_dropdown"
+import SinglePost from "@/components/single_posts"
 
 export type Summary = {
   name: string,
@@ -20,10 +21,31 @@ export type Series = {
 }
 
 function toDisplayName(fileName: string) {
-  return fileName.split("_")
-    .join(" ")
-    .split("-")[0]
-    .toUpperCase()
+  return fileName.split("_").join(" ").split("-")[0].toUpperCase()
+}
+
+function toSingleDisplayName(fileName: string) {
+  return fileName.split("_").join(" ").split(".")[0].toUpperCase()
+}
+
+function toSummary(fileName: string, contentSplit: string[], isSeries: boolean): Summary {
+  let part = -1
+  let name = ""
+  if (isSeries) {
+    part = Number(fileName.split("-")[1].split(".")[0].split("_")[1])
+    name = toDisplayName(fileName)
+  } else {
+    name = toSingleDisplayName(fileName)
+  }
+
+  return {
+    name: name,
+    rawName: fileName,
+    date: contentSplit[1].split("|")[0],
+    part: part,
+    summary: contentSplit[0],
+    tags: contentSplit[1].split("|")[1].split(",")
+  }
 }
 
 const seriesSums = []
@@ -48,13 +70,7 @@ export default async function Posts() {
   const allSolo: Summary[] = await Promise.all(
     allSoloPostingFilenames.map( async (fileName) => {
       const contentSplit = (await fs.readFile(path.join(postDirRoot, "solo_posts", fileName), "utf8")).split("---")
-      return {
-        name: toDisplayName(fileName),
-        rawName: fileName,
-        date: contentSplit[1],
-        part: -1, // -1 for solo postings
-        summary: contentSplit[0]
-      }
+      return toSummary(fileName, contentSplit, false)
     })
   )
   const allSeries: Series[] = await Promise.all(
@@ -69,38 +85,19 @@ export default async function Posts() {
         seriesSummary: summaryFileContent,
         posts: await Promise.all(fileNames.map(async (fileName) => {
           const contentSplit = (await fs.readFile(path.join(seriesDirRoot, fileName), "utf8")).split("---")
-          return {
-            name: fileName.split("_").join(" ").split("-")[0].toUpperCase(),
-            rawName: fileName,
-            date: contentSplit[1].split("|")[0],
-            part: Number(fileName.split("-")[1].split(".")[0].split("_")[1]),
-            summary: contentSplit[0],
-            tags: contentSplit[1].split("|")[1].split(",")
-          }
+          return toSummary(fileName, contentSplit, true)
         }))
       }
     }))
   
   
   
-  const soloPostings = (
-    <>
-      {allSolo.map(({name, rawName, part,  date, summary}) => (
-        <div key={name} className="bg-secondary dark:bg-dark-secondary flex flex-col place-items-center shadow">
-          
-          <div className="flex flex-col text-center">
-            <div className={`${fixedsys.className} text-2xl`}><Link href={`/blog/${rawName.split(".")[0]}`}>{name}</Link></div>
-            <div className="text-sm">{date}</div>
-            <div className="whitespace-nowrap">--------------------</div>
-          </div>
-          <p className="md:text-[0.92rem]  xs-font mr-10 mb-5 mt-5 ml-10">{summary}</p>
-                    
-        </div>
-      ))}
-    </>)
-
   return (
     <div className="flex flex-col gap-2 p-2">
+      
+      {allSolo.map(({name, rawName, date, summary, tags}) => (
+        <SinglePost key={name} name={name} date={date} rawName={rawName} summary={summary} tags={tags} isVisible={true} visibleModEnabled={false}/>
+      ))}
       {allSeries.map(({seriesName, seriesSummary, posts}) => (
         <SeriesDropdowns key={seriesName} seriesName={seriesName} seriesSummary={seriesSummary} posts={posts} className="gap-4"></SeriesDropdowns>
       ))}

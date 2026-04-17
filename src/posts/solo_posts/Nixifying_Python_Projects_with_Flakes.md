@@ -1,6 +1,6 @@
-Going over the basics of making pure Nix Python projects, as well as a few tid bits for impure Python development on NixOS.
+Going over the basics of making pure Nix Python projects, as well a small segment on impure Python development on NixOS. We also talk briefly on the library/module situation in the context Nix projects, such as common manipulations for directing programs to shared libraries. 
 ---
-8/7/2025|Python,Nix
+04/17/2026|Python,Nix
 ---
 Among new adopters of Nix, Python is often cited as a pain point. Just like many other favored technologies, translating them over to Nix can initially be an annoyance. A lot of this pain comes from trying to do things the "old way"; operating fully within Nix's paradigm tends to make things simple, especially once you're acquainted with writing Nix flakes. Truthfully, Nix can make certain things more difficult, such as when you want to use a python module that is not within Nixpkgs. Due to this, we'll go over impure development scenarios as well. 
 
@@ -20,7 +20,7 @@ So, nix-built binaries either have the correct path embedded set within the `.dy
 The [nixpkgs reference manual](https://nixos.org/manual/nixpkgs/stable/#python) provides a section detailing an assortment of tools to assist with pure Nix python projects. First, let us consider the development of a Python application. Depending on the complexity of your application, you'll likely want to use `pkgs.mkShell`, `pkgs.python3XX.withPackages.env`, potentially even along with `pkgs.python3XX.mkPythonEditablePackage`.
 
 ```nix 
-{
+  ...
   description = "Python example flake";
 
   inputs = {
@@ -39,7 +39,7 @@ The [nixpkgs reference manual](https://nixos.org/manual/nixpkgs/stable/#python) 
   {
     devShells."${system}".default = pyPkgs.env; 
   };
-}
+  ...
 ```
 
 The above is a bare-bones example of utilizing `pkgs.python3XX.withPackages` to provide the primitives for a working development environment. It is a simpler interface to the `pkgs.python3XX.buildEnv` function that exposes a few more options. `pkgs.mkShell` is also viable for development due to the setup hooks of included packages running. However, the derivation it produces cannot be used for actually building applications so its not recommended.
